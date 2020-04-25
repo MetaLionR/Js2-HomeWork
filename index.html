@@ -1,29 +1,20 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="script.js">
-<link rel="stylesheet" href="style.css">
-</head>
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eShop</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <header class="header">
+      <button class="cart-button" type="button">Корзина</button>
+    </header>
 
-<body>
-	<div id="wrapper">
-    <div class="item_box">
-        <h3 class="item_title">Маленький Гамбургер</h3>
-        <p>Цена: <span class="item_price">50</span>p</p>
-        <p>Калорий:<span class="item_calories">20</span></p>
-        <button class="add_item" data-id="7">Добавить в корзину</button>
-    </div>
-    <div class="item_box">
-        <h3 class="item_title">Больщой гамбургер</h3>
-        <p>Цена: <span class="item_price">100</span>p</p>
-        <p>Калорий:<span class="item_calories">40</span></p>
-        <button class="add_item" data-id="2">Добавить в корзину</button>
-    </div>
-    <p><button id="checkout">Оформить заказ</button> &nbsp; <button id="clear_cart">Очистить корзину</button></p>
-    <div id="cart_content"></div>
-	</div>
-    <script src="script.js"> </script>
-</body>
+    <main class="main">
+      <div class="goods-list"></div>
+    </main>
+    
+    <script src="script.js"></script>
+  </body>
 </html>

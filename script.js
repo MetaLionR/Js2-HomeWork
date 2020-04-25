@@ -1,74 +1,123 @@
-var d = document,
-    itemBox = d.querySelectorAll('.item_box'),
-		cartCont = d.getElementById('cart_content');
-function addEvent(elem, type, handler){
-  if(elem.addEventListener){
-    elem.addEventListener(type, handler, false);
-  } else {
-    elem.attachEvent('on'+type, function(){ handler.call( elem ); });
+function makeGETRequest(url, callback) {
+  return new Promise((resolve, reject) => {
+    let xhr;
+
+    if (window.XMLHttpRequest) {
+      xhr = new XMLHttpRequest();
+    } else if (window.ActiveXObject) { 
+      xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+  
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        resolve(callback(xhr.responseText));
+      }
+    }
+  
+    xhr.open('GET', url, true);
+    xhr.send();
+  });
+}
+
+
+class GoodsItem {
+  constructor(product_name, price) {
+    this.product_name = product_name;
+    this.price = price;
   }
-  return false;
+
+  render() {
+    return `<div class="goods-item">
+      <h3 class="goods-item__title">${ this.product_name }</h3>
+      <p class="goods-item__price">${ this.price }</p>
+    </div>`;
+  }
 }
 
-function getCartData(){
-	return JSON.parse(localStorage.getItem('cart'));
+const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
+
+class GoodsList {
+  constructor() {
+    this.goods = [];
+  }
+
+  fetchGoods() {
+    makeGETRequest(`${ API_URL }/catalogData.json`, (goods) => {
+      const promise = new Promise((resolve, reject) => {
+        resolve(this.goods = JSON.parse(goods));
+      });
+
+      promise
+        .then(this.render())
+        .then(this.calculateCost())
+    });
+  }
+
+  calculateCost() {
+    let sum = null;
+    this.goods.forEach(good => {
+      sum += good.price;
+    });
+    return sum;
+  }
+
+  render() {
+    let listHtml = '';
+    this.goods.forEach(good => {
+      const GoodItem = new GoodsItem(good.product_name, good.price);
+      listHtml += GoodItem.render();
+    });
+    document.querySelector('.goods-list').innerHTML = listHtml;
+  }
 }
 
-function setCartData(o){
-	localStorage.setItem('cart', JSON.stringify(o));
-	return false;
+class CartItem {
+  constructor() {}
+
+  increaseQuantity() {} //Увеличить кол-во продуктов, уже добавленных в корзину
+
+  reduceQuantity() {} //Уменьшить кол-во продуктов, уже добавленных в корзину
+
+  render() {}
 }
 
-function addToCart(e){
-	this.disabled = true; 
-	var cartData = getCartData() || {}, 
-			parentBox = this.parentNode, 
-			itemId = this.getAttribute('data-id'),
-			itemTitle = parentBox.querySelector('.item_title').innerHTML, 
-			itemPrice = parentBox.querySelector('.item_price').innerHTML,
-            itemCalories = parentBox.querySelector('.item_calories').innerHTML;
-	if(cartData.hasOwnProperty(itemId)){ 
-		cartData[itemId][3] += 1;
-	} else { 
-		cartData[itemId] = [itemTitle, itemPrice,itemCalories, 1];
-	}
-	if(!setCartData(cartData)){ 
-		this.disabled = false; 
-		cartCont.innerHTML = 'Товар добавлен в корзину.';
-		setTimeout(function(){
-			cartCont.innerHTML = 'Продолжить покупки...';
-		}, 1000);
-	}
-	return false;
+class Cart {
+  constructor() {}
+
+  goods = [];
+
+  //Добавить продукт в корзину
+  add(good) {
+    this.goods.push(good);
+  }
+
+  //Удалить продукт из корзины
+  remove(good) {
+    this.goods.splice(this.goods.indexOf(good), 1);
+  } 
+
+  clear() {} //Очистить корзину
+
+  calculateCost() {} //Подсчитать стоимость продуктов в корзине
+
+  //Получение списка товаров корзины
+  getList() {
+    return this.goods;
+  }
 }
 
-for(var i = 0; i < itemBox.length; i++){
-	addEvent(itemBox[i].querySelector('.add_item'), 'click', addToCart);
-}
+const list = new GoodsList();
+list.fetchGoods();
 
-function openCart(e){
-	
-	var cartData = getCartData(),
-			totalItems = '';
-	console.log(JSON.stringify(cartData));
-	if(cartData !== null){
-		totalItems = '<table class="shopping_list"><tr><th>Наименование</th><th>Цена<th>Калорийность</th></th><th>Кол-во</th></tr>';
-		for(var items in cartData){
-			totalItems += '<tr>';
-			for(var i = 0; i < cartData[items].length; i++){
-				totalItems += '<td>' + cartData[items][i] + '</td>';
-			}
-			totalItems += '</tr>';
-		}
-		totalItems += '<table>';
-		cartCont.innerHTML = totalItems;
-	} else {
-		cartCont.innerHTML = 'В корзине пусто!';
-	}
-	return false;
-}
-addEvent(d.getElementById('checkout'), 'click', openCart);
-addEvent(d.getElementById('clear_cart'), 'click', function(e){
-	localStorage.removeItem('cart');
-	cartCont.innerHTML = 'Корзина очишена.';	
-});
+const cart = new Cart();
+
+setTimeout(() => {
+  cart.add(list.goods[0]);
+  cart.add(list.goods[1]);
+  
+  cart.remove(cart[0]);
+
+  console.log(cart);
+
+  console.log(cart.getList());  
+}, 100);
